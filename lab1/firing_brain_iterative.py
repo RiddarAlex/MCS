@@ -1,4 +1,4 @@
-#MoCS Lab1 3a. A firing brain
+#MoCS Lab1 3a. A firing brain.
 
 import sys
 from matplotlib import colors
@@ -8,7 +8,7 @@ import matplotlib.animation as animation
 from matplotlib.colors import ListedColormap
 from matplotlib.pyplot import imshow
 
-RUNS = 100
+RUNS = 10
 T = 1000
 N = 40
 FIRING = 255
