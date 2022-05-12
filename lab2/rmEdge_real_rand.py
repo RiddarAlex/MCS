@@ -7,16 +7,19 @@ import matplotlib.pyplot as plt
 from statistics import mean
 
 # ============== read in data from a file ==============
-# alpha = 0.1
-iterations = 20
 
-for alpha in [0.1+0.1*i for i in range(9)]:
+iterations = 4
+
+alphas = [0.1+0.1*i for i in range(9)]
+avg_GCCs = [0 for i in range(len(alphas))]
+
+for a, alpha in enumerate(alphas):
 
     GCCs = [0 for i in range(iterations)]
 
     print(f"alpha = {alpha}")
     for iteration in range(iterations):
-        df = open("airlines.txt", 'r')
+        df = open("airlines/airlines.txt", 'r')
         num_vertices = 0
 
         for line in df:
@@ -25,9 +28,6 @@ for alpha in [0.1+0.1*i for i in range(9)]:
                 num_vertices = int(line_list[1])
                 break
 
-
-
-        # print("num_vertices =", num_vertices)
         G = nx.empty_graph(num_vertices)
 
         reading_edges = False
@@ -79,8 +79,8 @@ for alpha in [0.1+0.1*i for i in range(9)]:
     # print("Modularity value of this partition on airline network:",mod)
 
     # print("The various Gs are of order", n, "and size", ne, "and their maximum degree is", max_deg)
-    avg_GCC = mean(GCCs)
-    print(f"{iterations}-run avgGCC: {avg_GCC}")
+    avg_GCCs[a] = mean(GCCs)
+    print(f"{iterations}-run avgGCC: {avg_GCCs[a]}")
 
 
     # G_comm=sorted(map(sorted, G_communities))
@@ -100,3 +100,9 @@ for alpha in [0.1+0.1*i for i in range(9)]:
     # nx.draw(G, with_labels=False, node_color=node_colors, linewidths=1, font_size=15,node_size=30)
     #
     # plt.show()
+
+plt.plot(alphas, avg_GCCs)
+plt.title("Average Global Clustering Coefficient as a function of alpha random removal")
+plt.xlabel("Alpha")
+plt.ylabel("Avg_GCC")
+plt.show()
