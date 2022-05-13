@@ -8,11 +8,11 @@ from matplotlib.pyplot import imshow
 from random import randrange
 
 
-T = 100
+from matplotlib import colors
+
+
+
 N = 1000
-p = 0.01
-q = 0.05
-r = 0.01
 
 # STATES #
 RESTING = 2
@@ -23,56 +23,84 @@ states = [RESTING, SHARER, BORED]
 NO = 0
 YES = 1
 
-grid = [RESTING for i in range(N)]#np.zeros(N)
+grid = [RESTING for i in range(N)]
 grid[0], grid[-1] = SHARER, BORED
-print(grid)
+
+grid = np.array(grid).reshape(25,40)
+#print(grid)
 
 
 newGrid = grid.copy()
 
+t = 0
 
-for t in range(T):
+def update(data):
+    global grid
+    global t
 
-    recovered = 0
+    N = 1000
+    p = 0.01
+    q = 0.05
+    r = 0.01
 
-    for i in range(N):
-        if grid[i]  == RESTING:
-            newGrid[i] = np.random.choice(states, p=[1-p, p, 0])
+    # STATES #
+    RESTING = 2
+    SHARER = 3
+    BORED = 1
 
-        elif grid[i]  == SHARER:
-            will_share = np.random.choice([NO, YES], p=[1-q, q])
-            if will_share == YES:
-                target = randrange(N)
-                if grid[target] == RESTING:
-                    newGrid[target] = SHARER
-                elif grid[target] == BORED:
-                    newGrid[i] = BORED
+    states = [RESTING, SHARER, BORED]
+    NO = 0
+    YES = 1
 
-        elif grid[i]  == BORED:
-            will_browse = np.random.choice([NO, YES], p=[1-r, r])
-            if will_browse == YES:
-                target = randrange(N)
-                if grid[target] == RESTING:
-                    newGrid[i] = RESTING
+    for i in range(25):
+        for j in range(40):
+            if grid[i][j]  == RESTING:
+                newGrid[i][j] = np.random.choice(states, p=[1-p, p, 0])
 
+            elif grid[i][j]  == SHARER:
+                will_share = np.random.choice([NO, YES], p=[1-q, q])
+                if will_share == YES:
+                    target = randrange(N)
+                    target_x = target//40
+                    target_y = target_x%25
+                    if grid[target_x][target_y] == RESTING:
+                        newGrid[target_x][target_y] = SHARER
+                    elif grid[target_x][target_y] == BORED:
+                        newGrid[i][j] = BORED
+
+            elif grid[i][j]  == BORED:
+                will_browse = np.random.choice([NO, YES], p=[1-r, r])
+                if will_browse == YES:
+                    target = randrange(N)
+                    target_x = target//40
+                    target_y = target_x%25
+                    if grid[target_x][target_y] == RESTING:
+                        newGrid[i][j] = RESTING
+
+     # update data
+    mat.set_data(newGrid)
     grid = newGrid
+    plt.title(f"Timestep = {t}")
+    t = t+1
 
 
+    return [mat]
 
 
+    
+# set up animation
+fig, ax = plt.subplots()
 
-    plt.bar(range(N), grid)
-    plt.title(f't = {t}')
+# cmap = colors.ListedColormap(['green', 'black', 'yellow'])
+# cmap = colors.ListedColormap(['orange', 'lightyellow', 'olivedrab'])
+cmap = colors.ListedColormap(['olivedrab', 'lightyellow', 'red'])
+bounds = [0.5,1.5,2.5,3.5]
+norm = colors.BoundaryNorm(bounds, cmap.N)
+mat = plt.imshow(grid, interpolation='nearest', origin='lower',
+                    cmap=cmap, norm=norm)
 
-    plt.pause(0.001)
-    plt.clf()
+ani = animation.FuncAnimation(fig, update, interval=50,
+                              save_count=50)
 
-
-results = np.zeros(T)
-for t in range(T):
-    results[t] = np.mean(data[:,t])
-
-
-plt.ylabel('Percentage of infected people')
 
 plt.show()
