@@ -21,14 +21,12 @@ r = 0.01 #probablility of someone bored picking a random person
 RESTING = 2
 SHARER = 3
 BORED = 1
-
 states = [RESTING, SHARER, BORED]
 NO = 0
 YES = 1
 
-grid = [RESTING for i in range(N)]
+grid = [RESTING for i in range(N)]#np.zeros(N)
 grid[0], grid[-1] = SHARER, BORED
-
 # print(grid)
 
 
@@ -38,12 +36,8 @@ sharer_data = [0 for i in range(T)]
 bored_data = [0 for i in range(T)]
 
 
-grid = np.array(grid).reshape(25,40)
-#print(grid)
-
-
+for t in range(T):
     recovered = 0
-
     for i in range(N):
         if grid[i]  == RESTING:
             newGrid[i] = np.random.choice(states, p=[1-p, p, 0])
@@ -66,66 +60,13 @@ grid = np.array(grid).reshape(25,40)
                 if grid[target] == RESTING:
                     newGrid[i] = RESTING
             bored_data[t] += 1
-           
 
-t = 0
 
-def update(data):
-    global grid
-    global t
-
-    N = 1000
-    p = 0.01
-    q = 0.05
-    r = 0.01
-
-    # STATES #
-    RESTING = 2
-    SHARER = 3
-    BORED = 1
-
-    states = [RESTING, SHARER, BORED]
-    NO = 0
-    YES = 1
-
-    for i in range(25):
-        for j in range(40):
-            if grid[i][j]  == RESTING:
-                newGrid[i][j] = np.random.choice(states, p=[1-p, p, 0])
-
-            elif grid[i][j]  == SHARER:
-                will_share = np.random.choice([NO, YES], p=[1-q, q])
-                if will_share == YES:
-                    target = randrange(N)
-                    target_x = target//40
-                    target_y = target_x%25
-                    if grid[target_x][target_y] == RESTING:
-                        newGrid[target_x][target_y] = SHARER
-                    elif grid[target_x][target_y] == BORED:
-                        newGrid[i][j] = BORED
-
-            elif grid[i][j]  == BORED:
-                will_browse = np.random.choice([NO, YES], p=[1-r, r])
-                if will_browse == YES:
-                    target = randrange(N)
-                    target_x = target//40
-                    target_y = target_x%25
-                    if grid[target_x][target_y] == RESTING:
-                        newGrid[i][j] = RESTING
-
-     # update data
-    mat.set_data(newGrid)
     grid = newGrid
-    plt.title(f"Timestep = {t}")
-    t = t+1
 
 
-    return [mat]
 
 
-    
-# set up animation
-fig, ax = plt.subplots()
 
     # plt.bar(range(N), grid)
     # plt.title(f't = {t}')
