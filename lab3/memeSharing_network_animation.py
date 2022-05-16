@@ -12,7 +12,7 @@ from random import randrange
 
 counter = 0
 
-N = 100
+N = 32
 SHARER = 3
 RESTING = 2
 BORED = 1
@@ -64,58 +64,32 @@ def update(data):
     neighbourhood = [0, 1, 2, 3, 5, 6, 7, 8]
 
     newGrid = grid.copy()
-    for row in range(N):
-        for col in range(N):
-            # row = i // grid_dimension
-            # col = i % grid_dimension
-
-
+    for i in range(N):
+        for j in range(N):
+          
+            #CHOOSE A NEIGHBOR
             target = random.choice(neighbourhood)
-            target_row = ( grid_dimension + (row + target // 3 - 1) ) % grid_dimension
-            target_col = ( grid_dimension + (col + target % 3 - 1) ) % grid_dimension
 
-            if grid[row][col]  == RESTING:
-                newGrid[row][col] = np.random.choice(states, p=[1-p, p, 0])
-                # resting_data[t] += 1
+            y_target = (N + (j + target//3 - 1))%N
+            x_target = (N + (i + target%3  - 1))%N
 
-            elif grid[row][col]  == SHARER:
+            ### APPLY RULES       
+            if grid[i][j]  == RESTING:
+                newGrid[i][j] = np.random.choice(states, p=[1-p, p, 0])
+
+            elif grid[i][j]  == SHARER:
                 will_share = np.random.choice([NO, YES], p=[1-q, q])
                 if will_share == YES:
-                    if grid[target_row][target_col] == RESTING:
-                        newGrid[target_row][target_col] = SHARER
-                    elif grid[target_row][target_col] == BORED:
-                        newGrid[row][col] = BORED
-                # sharer_data[t] += 1
+                    if grid[x_target][y_target] == RESTING:
+                        newGrid[x_target][y_target] = SHARER
+                    elif grid[x_target][y_target] == BORED:
+                        newGrid[i][j] = BORED
 
-            elif grid[row][col]  == BORED:
+            elif grid[i][j] == BORED:
                 will_browse = np.random.choice([NO, YES], p=[1-r, r])
                 if will_browse == YES:
-                    if grid[target_row][target_col] == RESTING:
-                        newGrid[row][col] = RESTING
-            # bored_data[t] += 1 
-            # #CHOOSE A NEIGHBOR
-            # target = random.choice(potential_targets)
-
-            # y_target = (N + (j + target//3 - 1))%N
-            # x_target = (N + (i + target%3  - 1))%N
-
-            # ### APPLY RULES       
-            # if grid[i][j]  == RESTING:
-            #     newGrid[i][j] = np.random.choice(states, p=[1-p, p, 0])
-
-            # elif grid[i][j]  == SHARER:
-            #     will_share = np.random.choice([NO, YES], p=[1-q, q])
-            #     if will_share == YES:
-            #         if grid[x_target][y_target] == RESTING:
-            #             newGrid[x_target][y_target] = SHARER
-            #         elif grid[x_target][y_target] == BORED:
-            #             newGrid[i][j] = BORED
-
-            # elif grid[i][j] == BORED:
-            #     will_browse = np.random.choice([NO, YES], p=[1-r, r])
-            #     if will_browse == YES:
-            #         if grid[x_target][y_target] == RESTING:
-            #             newGrid[i][j] = RESTING
+                    if grid[x_target][y_target] == RESTING:
+                        newGrid[i][j] = RESTING
 
 
     # update data
