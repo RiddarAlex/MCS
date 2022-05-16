@@ -6,13 +6,16 @@ import matplotlib.animation as animation
 from matplotlib.colors import ListedColormap
 from matplotlib.pyplot import imshow
 from random import randrange
+import random
+from datetime import datetime
+random.seed()
 
 
-from matplotlib import colors
-
-
-
+T = 500
 N = 1000
+p = 0.01 #probability of someone resting finding a meme
+q = 0.05 #probablility of a sharer picking a random person
+r = 0.01 #probablility of someone bored picking a random person
 
 # STATES #
 RESTING = 2
@@ -26,11 +29,44 @@ YES = 1
 grid = [RESTING for i in range(N)]
 grid[0], grid[-1] = SHARER, BORED
 
+# print(grid)
+
+
+newGrid = grid.copy()
+resting_data = [0 for i in range(T)]
+sharer_data = [0 for i in range(T)]
+bored_data = [0 for i in range(T)]
+
+
 grid = np.array(grid).reshape(25,40)
 #print(grid)
 
 
-newGrid = grid.copy()
+    recovered = 0
+
+    for i in range(N):
+        if grid[i]  == RESTING:
+            newGrid[i] = np.random.choice(states, p=[1-p, p, 0])
+            resting_data[t] += 1
+
+        elif grid[i]  == SHARER:
+            will_share = np.random.choice([NO, YES], p=[1-q, q])
+            if will_share == YES:
+                target = randrange(N)
+                if grid[target] == RESTING:
+                    newGrid[target] = SHARER
+                elif grid[target] == BORED:
+                    newGrid[i] = BORED
+            sharer_data[t] += 1
+
+        elif grid[i]  == BORED:
+            will_browse = np.random.choice([NO, YES], p=[1-r, r])
+            if will_browse == YES:
+                target = randrange(N)
+                if grid[target] == RESTING:
+                    newGrid[i] = RESTING
+            bored_data[t] += 1
+           
 
 t = 0
 
@@ -91,16 +127,23 @@ def update(data):
 # set up animation
 fig, ax = plt.subplots()
 
-# cmap = colors.ListedColormap(['green', 'black', 'yellow'])
-# cmap = colors.ListedColormap(['orange', 'lightyellow', 'olivedrab'])
-cmap = colors.ListedColormap(['olivedrab', 'lightyellow', 'red'])
-bounds = [0.5,1.5,2.5,3.5]
-norm = colors.BoundaryNorm(bounds, cmap.N)
-mat = plt.imshow(grid, interpolation='nearest', origin='lower',
-                    cmap=cmap, norm=norm)
+    # plt.bar(range(N), grid)
+    # plt.title(f't = {t}')
 
-ani = animation.FuncAnimation(fig, update, interval=50,
-                              save_count=50)
+    # plt.pause(0.001)
+    # plt.clf()
+
+# results = np.zeros(T)
+# for t in range(T):
+#     results[t] = np.mean(data[:,t])
+
+# plt.ylabel('Percentage of infected people')
 
 
+plt.plot(range(T), resting_data, label="resting")
+plt.plot(range(T), sharer_data, label="sharer")
+plt.plot(range(T), bored_data, label="bored")
+plt.xlabel('t')
+plt.ylabel('Number of occurences')
+plt.legend()
 plt.show()
