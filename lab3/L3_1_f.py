@@ -1,4 +1,3 @@
-from random import randrange
 import sys
 from matplotlib import colors
 import numpy as np
@@ -6,95 +5,108 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import ListedColormap
 from matplotlib.pyplot import imshow
+from random import randrange
 
 
-import matplotlib.pyplot as plt
-import numpy as np
+from matplotlib import colors
 
-time_steps = 1000
+
+
 N = 1000
 
-
-p = 0.01
-q = 0.05
-r = 0.01
-
-# STATES
+# STATES #
 RESTING = 2
 SHARER = 3
 BORED = 1
 
 states = [RESTING, SHARER, BORED]
+NO = 0
+YES = 1
 
-iterations = 1
+grid = [RESTING for i in range(N)]
+grid[0], grid[1] = SHARER, BORED
 
-data = np.zeros((iterations, time_steps))
+grid = np.array(grid).reshape(25,40)
+#print(grid)
 
 
+newGrid = grid.copy()
 
-for j in range(iterations):
+t = 0
 
-    grid = RESTING*np.ones(N)
+def update(data):
+    global grid
+    global t
 
-    grid[0] = SHARER
-    grid[1] = BORED
+    N = 1000
+    p = 0.001
+    q = 0.01
+    r = 0.01
+
+    # p = 0.01
+    # q = 0.05
+    # r = 0.01
+
+    # STATES #
+    RESTING = 2
+    SHARER = 3
+    BORED = 1
+
+    states = [RESTING, SHARER, BORED]
+    NO = 0
+    YES = 1
+
+    for i in range(25):
+        for j in range(40):
+            if grid[i][j]  == RESTING:
+                newGrid[i][j] = np.random.choice(states, p=[1-p, p, 0])
+
+            elif grid[i][j]  == SHARER:
+                will_share = np.random.choice([NO, YES], p=[1-q, q])
+                if will_share == YES:
+                    target = randrange(N)
+                    target_x = target//40
+                    target_y = target%40
+                    if grid[target_x][target_y] == RESTING:
+                        newGrid[target_x][target_y] = SHARER
+                    elif grid[target_x][target_y] == BORED:
+                        newGrid[i][j] = BORED
+
+            elif grid[i][j]  == BORED:
+                will_browse = np.random.choice([NO, YES], p=[1-r, r])
+                if will_browse == YES:
+                    target = randrange(N)
+                    target_x = target//40
+                    target_y = target_x%25
+                    if grid[target_x][target_y] == RESTING:
+                        newGrid[i][j] = RESTING
+
+     # update data
+    mat.set_data(newGrid)
+    grid = newGrid
+    plt.title(f"Timestep = {t}")
+    t = t+1
+
+
+    return [mat]
+
+
     
+# set up animation
+fig, ax = plt.subplots()
 
-    x = np.zeros(N)
+# cmap = colors.ListedColormap(['green', 'black', 'yellow'])
+cmap = colors.ListedColormap(['orange', 'lightyellow', 'olivedrab'])
+# cmap = colors.ListedColormap(['tab:green', 'tab:blue', 'tab:orange'])
+bounds = [0.5,1.5,2.5,3.5]
+norm = colors.BoundaryNorm(bounds, cmap.N)
+mat = plt.imshow(grid, interpolation='nearest', origin='lower',
+                    cmap=cmap, norm=norm)
 
-    newGrid = grid.copy()
+plt.colorbar(mat, cmap=cmap, norm=norm, boundaries=bounds, ticks=[BORED, RESTING, SHARER])
 
-    for t in range(time_steps):
-
-    
-
-        for i in range(N):
-
-
-            if (grid[i] == RESTING):
-                newGrid[i] = np.random.choice(states, p=[1-p, p, 0])
-
-            elif (grid[i] == SHARER):
-                pick = np.random.choice([0, 1], p=[1-q, q])
-                if (pick == 1):
-                    random_body = randrange(N)
-                    if (grid[random_body] == RESTING):
-                        newGrid[random_body] = SHARER
-                    elif (grid[random_body] == BORED):
-                        newGrid[i] = BORED
-
-            elif (grid[i] == BORED):
-                pick = np.random.choice([0, 1], p=[1-r, r])
-                if (pick == 1):
-                    random_body = randrange(N)
-                    if (grid[random_body] == RESTING):
-                        newGrid[i] = RESTING
+ani = animation.FuncAnimation(fig, update, interval=50,
+                              save_count=50)
 
 
-            x[i] = i+1
-
-        #sick = np.sum(newGrid)
-        data[j,t] = np.sum(grid)
-
-        grid = newGrid
-
-
-
-
-
-        plt.bar(x, grid)
-        plt.title(f"t = {t} out of {time_steps}")
-        plt.pause(0.001)
-        plt.clf()
-
-
-# results = np.zeros(time_steps)
-# for t in range(time_steps):
-#     results[t] = np.mean(data[:,t])
-
-# plt.plot(range(time_steps), results)
-# plt.title('Average percentage of infected people at each timestep')
-# plt.ylabel('Percentage of infected people')
-# plt.xlabel('Timesteps')
-
-# plt.show()
+plt.show()
