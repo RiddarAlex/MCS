@@ -10,9 +10,11 @@ import random
 from datetime import datetime
 random.seed()
 
+grid_dimension = 32
 
 T = 500
-N = 1000
+
+N = grid_dimension**2
 p = 0.01 #probability of someone resting finding a meme
 q = 0.05 #probablility of a sharer picking a random person
 r = 0.01 #probablility of someone bored picking a random person
@@ -25,9 +27,13 @@ states = [RESTING, SHARER, BORED]
 NO = 0
 YES = 1
 
-grid = [RESTING for i in range(N)]#np.zeros(N)
-grid[0], grid[-1] = SHARER, BORED
-# print(grid)
+neighbourhood = list(range(9))
+neighbourhood.pop(4)
+# print(neighbourhood)
+
+grid = RESTING*np.ones((grid_dimension, grid_dimension))#[RESTING for i in range(N)]#np.zeros(N)
+grid[0][0], grid[-1][-1] = SHARER, BORED
+print(grid)
 
 
 newGrid = grid.copy()
@@ -37,28 +43,35 @@ bored_data = [0 for i in range(T)]
 
 
 for t in range(T):
-    recovered = 0
+
     for i in range(N):
-        if grid[i]  == RESTING:
-            newGrid[i] = np.random.choice(states, p=[1-p, p, 0])
+
+
+        row = i // grid_dimension
+        col = i % grid_dimension
+
+        target = random.choice(neighbourhood)
+        target_row = ( grid_dimension + (row + target // 3 - 1) ) % grid_dimension
+        target_col = ( grid_dimension + (col + target % 3 - 1) ) % grid_dimension
+
+        if grid[row][col]  == RESTING:
+            newGrid[row][col] = np.random.choice(states, p=[1-p, p, 0])
             resting_data[t] += 1
 
-        elif grid[i]  == SHARER:
+        elif grid[row][col]  == SHARER:
             will_share = np.random.choice([NO, YES], p=[1-q, q])
             if will_share == YES:
-                target = randrange(N)
-                if grid[target] == RESTING:
-                    newGrid[target] = SHARER
-                elif grid[target] == BORED:
-                    newGrid[i] = BORED
+                if grid[target_row][target_col] == RESTING:
+                    newGrid[target_row][target_col] = SHARER
+                elif grid[target_row][target_col] == BORED:
+                    newGrid[row][col] = BORED
             sharer_data[t] += 1
 
-        elif grid[i]  == BORED:
+        elif grid[row][col]  == BORED:
             will_browse = np.random.choice([NO, YES], p=[1-r, r])
             if will_browse == YES:
-                target = randrange(N)
-                if grid[target] == RESTING:
-                    newGrid[i] = RESTING
+                if grid[target_row][target_col] == RESTING:
+                    newGrid[row][col] = RESTING
             bored_data[t] += 1
 
 
