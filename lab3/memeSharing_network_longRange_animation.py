@@ -20,10 +20,11 @@ states = [RESTING, SHARER, BORED]
 NO = 0
 YES = 1
 
-grid = [RESTING for i in range(N*N)]
-grid[0], grid[1] = SHARER, BORED
-grid[20] = BORED
-grid = np.array(grid).reshape(N,N)
+# grid = [RESTING for i in range(N*N)]
+# grid[0], grid[1] = SHARER, BORED
+# grid[20] = BORED
+# grid = np.array(grid).reshape(N,N)
+grid = np.random.choice([1, 2, 3], N*N, p=[1/3, 1/3, 1/3]).reshape(N, N)
 #print(grid)
 
 
@@ -43,13 +44,10 @@ def update(data):
 
     grid_dimension = N
 
-    p = 0.1
-    q = 0.5
-    r = 0.1
-
-    # p = 0.01
-    # q = 0.05
-    # r = 0.01
+  
+    p = 0.05
+    q = 0.05
+    r = 0.5
 
     # STATES #
     
@@ -62,7 +60,7 @@ def update(data):
     YES = 1
 
     interval = 10
-    frequency = 10
+    frequency = 50
 
     newGrid = grid.copy()
     for i in range(N):
@@ -107,6 +105,8 @@ def update(data):
     # update data
     mat.set_data(newGrid)
     grid = newGrid
+    plt.title(f't = {t}')
+    t += 1
 
 
     return [mat]

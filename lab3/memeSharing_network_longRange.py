@@ -12,12 +12,12 @@ random.seed()
 
 grid_dimension = 32
 
-T = 500
+T = 2000
 
 N = grid_dimension**2
-p = 0.01 #probability of someone resting finding a meme
+p = 0.05 #probability of someone resting finding a meme
 q = 0.05 #probablility of a sharer picking a random person
-r = 0.01 #probablility of someone bored picking a random person
+r = 0.5 #probablility of someone bored picking a random person
 
 # STATES #
 RESTING = 2
@@ -35,6 +35,7 @@ remote_distance = 10
 
 grid = RESTING*np.ones((grid_dimension, grid_dimension))#[RESTING for i in range(N)]#np.zeros(N)
 grid[0][0], grid[-1][-1] = SHARER, BORED
+grid = np.random.choice([1, 2, 3], N*N, p=[1/3, 1/3, 1/3]).reshape(N, N)
 print(grid)
 
 
@@ -104,6 +105,7 @@ for t in range(T):
 plt.plot(range(T), resting_data, label="resting")
 plt.plot(range(T), sharer_data, label="sharer")
 plt.plot(range(T), bored_data, label="bored")
+plt.title(f'State distribution vs time for p = {p}, q = {q}, r = {r}')
 plt.xlabel('t')
 plt.ylabel('Number of occurences')
 plt.legend()
