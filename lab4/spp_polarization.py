@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-L = 32.0
+L = 5#32.0
 rho = 3.0
 N = int(rho*L**2)
 print(" N",N)
@@ -16,8 +16,8 @@ delta_t = 1.0    # timestep
 factor = 0.5
 v0 = r0/delta_t*factor # velocity
 
-T = 1
-iterations = 10
+T = 1000
+iterations = 100
 
 #eta = 0.1       #noise term
 number_of_etas = 10
