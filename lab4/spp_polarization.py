@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-L = 32.0
+L = 5#32.0
 rho = 3.0
 N = int(rho*L**2)
 print(" N",N)
@@ -17,10 +17,10 @@ factor = 0.5
 v0 = r0/delta_t*factor # velocity
 
 T = 1000
-iterations = 10
+iterations = 100
 
 #eta = 0.1       #noise term
-number_of_etas = 5
+number_of_etas = 10
 eta_list = [0.1*i for i in range(number_of_etas)]
 
 
@@ -78,9 +78,9 @@ for eta_index, eta in enumerate(eta_list):
             # qv.set_UVC(cos, sin,orient)
             # return qv,
 
-    # polArr[iteration] = np.sqrt(sum(cos)**2 + sum(sin)**2)/N
-    polarization_arr.append(np.sqrt(sum(cos)**2 + sum(sin)**2)/N)
-    eta_arr.append(eta)
+        # polArr[iteration] = np.sqrt(sum(cos)**2 + sum(sin)**2)/N
+        polarization_arr.append(np.sqrt(sum(cos)**2 + sum(sin)**2)/N)
+        eta_arr.append(eta)
 
 # anim = FuncAnimation(fig,animate,np.arange(1, 200),interval=1)
 
