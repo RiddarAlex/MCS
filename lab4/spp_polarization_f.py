@@ -15,12 +15,11 @@ r0 = 0.5 #1.0        # radius
 delta_t = 1.0    # timestep
 factor = 0.5
 v0 = r0/delta_t*factor # velocity
-T = 1000
-# eta = 0.1       #noise term
-
-
-iterations = 100
+T = 10
+iterations = 10
 number_of_etas = 10
+
+
 #pol_data = np.zeros(iterations, number_of_etas)
 polArr = []
 etaArr = []
