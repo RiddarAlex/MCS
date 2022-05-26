@@ -33,7 +33,7 @@ def main():
     No_chromosomes = 50
     genes_per_chromosome = 54
 
-    No_generations = 5
+    No_generations = 2
     No_iterations = 5
 
     fitness = np.zeros((No_chromosomes, No_generations))
@@ -59,8 +59,56 @@ def main():
             fitness[chromosome][generation] = np.mean(avg_fitness)
             # print(painter_play(population[chromosome,:], room))
 
+    # print(fitness)
 
-    print(fitness[:][-1])
+    # print(np.sort(fitness[:,-1]))
+
+    # print(fitness[:,-1])
+
+    # print( type(np.where(fitness[:,-1] > np.sort(fitness[:,-1])[10])) )
+
+
+
+        top40indices, = np.where(fitness[:,-1] > np.sort(fitness[:,-1])[10])
+
+        top10indices = np.where(fitness[:,-1] >= np.sort(fitness[:,-1])[40])
+
+        print(np.sort(fitness[top40indices,-1]))
+
+        print(np.sort(fitness[top10indices,-1]))
+
+        # print(top40)
+
+
+        new_population = population.copy()
+
+
+        offspring_index = 0
+
+        for parent1 in top40indices:
+
+            parent2 = np.random.choice(top40indices)
+
+            split_index = random.randrange(genes_per_chromosome)
+
+            new_population[offspring_index] = np.append(population[parent1][0:split_index],
+            population[parent2][split_index:-1])
+
+            offspring_index += 1
+
+        for parent1 in top10indices:
+
+            parent2 = np.random.choice(top10indices)
+
+            split_index = random.randrange(genes_per_chromosome)
+
+            new_population[offspring_index] = np.append(population[parent1][0:split_index],
+            population[parent2][split_index:-1])
+
+            offspring_index += 1
+
+
+        population = new_population
 
 
 def painter_play(rules,room):
