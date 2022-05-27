@@ -2,6 +2,7 @@ import numpy as np
 import random
 import math
 import matplotlib.pyplot as plt
+from matplotlib import colors
 
 # %Floor painter algorithm
 # %Code translated into python Fiona Skerman from matlab code written by Alex Szorkovszky for UU Modelling Complex Systems
@@ -30,8 +31,17 @@ import matplotlib.pyplot as plt
 # ypos: y positions over time
 
 def main():
-    test_room=np.zeros((20,40))
+    M = 20 
+    N = 40
+    test_room=np.zeros((M,N))
+    for i in range(100):
+      x = random.randrange(M)
+      y = random.randrange(N)
+      test_room[x,y] = 1
     
+    
+
+    print(test_room)
 
     NoGenerations = 200
     NoChromosomes = 50
@@ -93,19 +103,33 @@ def main():
 
         population = offspring    
 
-        print(np.size(top40indices))
-        print(np.size(top10indices))
+        print(f"Generation {generation}")
+        
+
+    print(f"Average fitness each generation: {avg_fitness}")
+
+    topindex, = np.where(fitness_arr == np.sort(fitness_arr)[-1])
+
+    print(f"Best Chromosome: {population[topindex]}")
+
+    plt.figure()
+    mat = plt.imshow(population)
+    plt.title('Final Chromosomes')
+    bounds = [-0.5,0.5,1.5,2.5,3.5]
+    norm = colors.BoundaryNorm(bounds,4)
+    plt.colorbar(mat, norm=norm, boundaries=bounds, ticks=[0, 1, 2, 3])
 
     print(avg_fitness)
-
+    plt.figure()
     plt.plot(range(NoGenerations), avg_fitness, '--o')
     plt.xlabel('Generation')
     plt.ylabel('Average fitness')
-    plt.title('Average fitness for each generation')
+    plt.title(f'Average fitness vs generation')
     plt.show()
 
     # print(painter_play(population, test_room))
     return
+
 
 def painter_play(rules,room):
   #returns score, xpos, ypos
@@ -122,7 +146,7 @@ def painter_play(rules,room):
   env = np.ones((M+2,N+2))
   for i in range(1, M+1):
     for j in range(1, N+1):
-      env[i][j]=0
+      env[i][j]=room[i-1,j-1]
 
   #new room size including walls
   M=M+2
@@ -219,6 +243,7 @@ def painter_play(rules,room):
   # %normalise score by time
   score = score/t
 
+  # return score, xpos, ypos, #env
   return score #, xpos, ypos, #env
 
 
