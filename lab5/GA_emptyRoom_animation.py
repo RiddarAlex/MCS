@@ -1,3 +1,4 @@
+from cgi import test
 import numpy as np
 import random
 import math
@@ -31,7 +32,6 @@ from matplotlib import colors
 # ypos: y positions over time
 
 
-
 def painter_play(rules,room):
   #returns score, xpos, ypos
 
@@ -47,7 +47,7 @@ def painter_play(rules,room):
   env = np.ones((M+2,N+2))
   for i in range(1, M+1):
     for j in range(1, N+1):
-      env[i][j]=0
+      env[i][j]=room[i-1,j-1]
 
   #new room size including walls
   M=M+2
@@ -146,31 +146,42 @@ def painter_play(rules,room):
 
   return score, xpos, ypos, #env
 
-test_room=np.zeros((20,40))
-# for i in range(100):
-#     x = random.randrange(20)
-#     y = random.randrange(40)
-#     test_room[x,y] = 1
+M = 20
+N = 40
 
+test_room=np.zeros((M,N))
+for i in range(100):
+    x = random.randrange(M)
+    y = random.randrange(N)
+    test_room[x,y] = 1
 
-test_rules = [2, 0, 0, 3, 0, 3, 2, 2, 1, 2, 2, 0, 2, 0, 0, 0, 0, 0, 1, 0, 1, 1, 3, 3, 0, 1, 3, 3, 1, 3, 1, 2, 0, 1, 3, 3, 0, 3, 2, 1, 1, 0, 1, 1, 2, 1, 2, 0, 2, 3, 0, 1, 3, 0,]
+# print(test_room)
+
+### empty room
+# test_rules = [2, 0, 0, 3, 0, 3, 2, 2, 1, 2, 2, 0, 2, 0, 0, 0, 0, 0, 1, 0, 1, 1, 3, 3, 0, 1, 3, 3, 1, 3, 1, 2, 0, 1, 3, 3, 0, 3, 2, 1, 1, 0, 1, 1, 2, 1, 2, 0, 2, 3, 0, 1, 3, 0]
+### obstacles
+test_rules = [2, 1, 0, 2, 0, 0, 0, 0, 0, 1, 1, 2, 3, 2, 3, 1, 2, 0, 1, 3, 3, 1, 1, 3, 3, 2, 2, 2, 1, 2, 3, 2, 1, 1, 1, 3, 1, 1, 1, 2, 1, 3, 2, 2, 2, 1, 0, 2, 1, 2, 0, 0, 1, 0,]
 
 score, xpos, ypos = painter_play(test_rules, test_room)
 
 # print(xpos)
 # print(ypos)
+# print(len(xpos))
 # plt.imshow(test_room)
 
-cmap = colors.ListedColormap(['white', 'black', 'red'])
+cmap = colors.ListedColormap(['white', 'black', 'red', 'green'])
 # cmap = colors.ListedColormap(['tab:green', 'tab:blue', 'tab:orange'])
 
-bounds = [-0.5,0.5,1.5,2.5]
+bounds = [-0.5,0.5,1.5,2.5,3.5]
 norm = colors.BoundaryNorm(bounds, cmap.N)
 mat = plt.imshow(test_room, interpolation='nearest', origin='lower',
                     cmap=cmap, norm=norm)
 
-for i in range(20*40):
-    test_room[xpos[i]-1,ypos[i]-1] = 2
+T = int(M*N-test_room.sum())
+for i in range(T):
+    test_room[xpos[i]-1,ypos[i]-1] = 3
+    if i != 0:
+        test_room[xpos[i-1]-1,ypos[i-1]-1] = 2
     plt.title(f"Time: {i}")
     mat = plt.imshow(test_room, interpolation='nearest', origin='lower',
                     cmap=cmap, norm=norm)
