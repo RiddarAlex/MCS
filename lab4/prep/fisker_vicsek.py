@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from math import pi, sqrt, cos, sin, atan2
+from statistics import mean
 
 #for videos
 import moviepy.video.io.ImageSequenceClip
@@ -79,6 +80,25 @@ def get_neighbors(particles, r, x0, y0):
             neighbors.append(j)
 
     return neighbors
+
+# return relative average position
+def get_avgPosition(particles, r1, r2, x0, y0):
+
+    x_arr = []
+    y_arr = []
+
+    for j,(x1,y1) in enumerate(particles):
+        dist = torus_distance(x0, y0, x1, y1)
+
+        if dist > r1 and dist < r2:
+            x_arr.append(x1)
+            y_arr.append(y1)
+        
+    if len(x_arr) == 0:
+        return (0,0)    
+
+    return (mean(x_arr)-x0, mean(y_arr)-y0)
+    
 
 
 # average unit vectors for all angles
@@ -166,14 +186,17 @@ if __name__ == '__main__':
     if not os.path.exists(plotdir):
         os.mkdir(os.path.join(simdir, "plots"))
 
-    N = 100           # num of particles
+    N = 40           # num of particles
     eta = 0.1       # noise in [0,1], add noise uniform in [-eta*pi, eta*pi]
     r = 0.1          # radius
+
+    r_attraction = r * 1.5
+    
     delta_t = 0.01   # time step
 
     # Maximum time
     t = 0.0
-    T = 0.2 #was 2.0
+    T = 2 #was 2.0
 
     # Generate random particle coordinates
     # particles[i,0] = x
@@ -202,6 +225,12 @@ if __name__ == '__main__':
             # get neighbor indices for current particle
             neighbors = get_neighbors(particles, r, x, y)
 
+            avgPos = get_avgPosition(particles, r, r_attraction, x, y)
+
+            attraction_coefficient = 0.2
+
+            attraction_angle = vector_2_angle(avgPos)
+
             # get average theta angle
             avg = get_average(thetas, neighbors)
 
@@ -210,8 +239,10 @@ if __name__ == '__main__':
 
             noise = eta * n_angle
 
+            angle = (avg*(1-attraction_coefficient) + attraction_coefficient*attraction_angle)
+
             # get new theta
-            thetas[i] = avg + noise
+            thetas[i] = angle + noise 
 
             # move to new position
             particles[i,:] += delta_t * angle_2_vector(thetas[i])
@@ -229,9 +260,19 @@ if __name__ == '__main__':
             if particles[i, 1] > 1:
                 particles[i, 1] = particles[i, 1] - 1
 
+
+        
         # new time step
         t += delta_t
     print()
+
+    # final_neighbors = 0
+    # for i, (x, y) in enumerate(particles):
+    #     # get neighbor indices for current particle
+    #     final_neighbors += len(get_neighbors(particles, r, x, y))
+    # final_neighbors /=N
+
+    # print(final_neighbors)
 
     print("Processing particles txt files to images", end='', flush=True)
     txt_files = [i for i in os.listdir(particledir) if i.endswith(".txt")]
