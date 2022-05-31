@@ -88,30 +88,30 @@ def update(data):
                     newGrid[current] = EMPTY
 
             elif (grid[forward] != EMPTY and grid[left] != EMPTY) and (grid[right] != EMPTY):
-                move_if_possible([backward, current], [0, 1], [PB, PW3])
+                move_if_possible([backward, current], [PB, PW3])
 
             elif grid[forward] == myType:
 
                 if (grid[left] == EMPTY) and (grid[right] == EMPTY):
-                    move_if_possible([left, right, current], [0, 1, 2], [PL11, PR11, PW11])
+                    move_if_possible([left, right, current], [PL11, PR11, PW11])
 
                 elif (grid[left] != EMPTY) and (grid[right] == EMPTY):
-                    move_if_possible([right, current], [0, 1], [PR12, PW12])
+                    move_if_possible([right, current], [PR12, PW12])
 
                 elif (grid[left] == EMPTY) and (grid[right] != EMPTY):
-                    move_if_possible([left, current], [0, 1], [PL13, PW13])
+                    move_if_possible([left, current], [PL13, PW13])
 
 
             elif grid[forward] == otherType:
 
                 if (grid[left] == EMPTY) and (grid[right] == EMPTY):
-                    move_if_possible([left, right, current], [0, 1, 2], [PL21, PR21, PW21])
+                    move_if_possible([left, right, current], [PL21, PR21, PW21])
 
                 elif (grid[left] != EMPTY) and (grid[right] == EMPTY):
-                    move_if_possible([right, current], [0, 1], [PR22, PW22])
+                    move_if_possible([right, current], [PR22, PW22])
 
                 elif (grid[left] == EMPTY) and (grid[right] != EMPTY):
-                    move_if_possible([left, current], [0, 1], [PL23, PW23])
+                    move_if_possible([left, current], [PL23, PW23])
 
     # update data
     mat.set_data(newGrid)
@@ -122,7 +122,8 @@ def update(data):
     return [mat]
 
 #-------------------------------------------------------------------------------
-def move_if_possible(choices, indices, probabilities):
+def move_if_possible(choices, probabilities):
+    indices = [e for e in range(len(choices))]
     index = np.random.choice(indices, p=probabilities)
     target = choices[index]
 
