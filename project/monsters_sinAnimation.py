@@ -9,6 +9,7 @@ from matplotlib.colors import ListedColormap
 from matplotlib.pyplot import imshow
 import random
 from random import randrange
+from statistics import mean
 
 N = 32
 
@@ -18,12 +19,13 @@ states = [EMPTY, UP, DOWN, MONSTER]
 grid = [EMPTY for i in range(N*N)]
 
 grid = np.random.choice(states, (N,N+2), p=[0.95, 0.02, 0.02, 0.01])
+# grid = np.random.choice(states, (N,N+2), p=[0.7, 0.15, 0.15])
 for i in range(N):
     grid[i][0], grid[i][-1] = WALL, WALL
 
 newGrid = grid.copy()
 
-t = 0
+T = 200
 totalFlow = []
 
 # PROBABILITIES
@@ -35,26 +37,24 @@ PR22, PW22       = 0.75, 0.25
 PL23, PW23       = 0.25, 0.75
 PB  , PW3        = 0.5, 0.5
 
-#-------------------------------------------------------------------------------
-def update(data):
 
-    global totalFlow
+
+#-------------------------------------------------------------------------------
+def move_if_possible(choices, probabilities):
+    indices = [e for e in range(len(choices))]
+    index = np.random.choice(indices, p=probabilities)
+    target = choices[index]
+
+    if newGrid[target] == EMPTY:
+        newGrid[target] = myType
+        newGrid[current] = EMPTY
+
+#-------------------------------------------------------------------------------
+for t in range(T):
     currentFlow = 0
 
-    # STATES #
-    global EMPTY, UP, DOWN
-    states = [EMPTY, UP, DOWN]
+    # plt.title(f"t = {t}")
 
-    # PROBABILITIES #
-    global PL11, PR11, PW11, PR12, PW12, PL13, PW13, \
-     PL21, PR21, PW21, PR22, PW22, PL23, PW23, PB, PW3
-
-    # FUNCTION INPUT #
-    global newGrid, myType, current
-
-    # DOMAIN #
-    global grid, t, N
-    plt.title(f"t = {t}")
     newGrid = grid.copy()
 
 
@@ -87,7 +87,6 @@ def update(data):
                 backward = ((N + i - 1) % N , j      )
                 left     = (i               , (j - 1))
                 right    = (i               , (j + 1))
-
 
                 move_if_possible([forward, backward, left, right], [0.25, 0.25, 0.25, 0.25])
                 continue
@@ -130,50 +129,58 @@ def update(data):
                     move_if_possible([left, current], [PL23, PW23])
 
 
-
-
-    # update data
-    mat.set_data(newGrid)
     grid = newGrid
-
     totalFlow.append(currentFlow)
     if t%50 == 0:
         print(f"t: {t} \tPopulation size: {populationSize}")
-        if t != 0:
-            flow = sum(totalFlow)/(populationSize*t)
-            print(f"Flow: {flow}")
-    print(f"Flow at t = {t}: {totalFlow[t]}")
+    # print(f"Flow at t = {t}: {totalFlow[t]}")
 
-    t += 1
-    return [mat]
 
 #-------------------------------------------------------------------------------
-def move_if_possible(choices, probabilities):
-    indices = [e for e in range(len(choices))]
-    index = np.random.choice(indices, p=probabilities)
-    target = choices[index]
+homogeneity = []
+upCounts = []
+downCounts = []
 
-    if newGrid[target] == EMPTY:
-        newGrid[target] = myType
-        newGrid[current] = EMPTY
+for col in range(1,N+1):
+    upCount, downCount = 0, 0
+    for row in range(N):
+        if grid[row][col] == UP:
+            upCount += 1
+        elif grid[row][col] == DOWN:
+            downCount += 1
 
-#-------------------------------------------------------------------------------
+    upCounts.append(upCount)
+    downCounts.append(downCount)
+
+    if upCount + downCount > 0:
+        homogeneity.append((upCount - downCount)/(upCount + downCount))
+    else:
+        homogeneity.append(0)
 
 
-# set up animation
+print(F"Homogeneity: {homogeneity}")
+sortedness = mean([abs(e) for e in homogeneity])
+print(f"Sortedness: {sortedness}")
+
+flow = sum(totalFlow)/(populationSize*T)
+print(f"Flow: {flow}")
+
 fig, ax = plt.subplots()
 
-# cmap = colors.ListedColormap(['green', 'black', 'yellow'])
-cmap = colors.ListedColormap(['lightyellow', 'red', 'blue', 'green', 'black'])
-# cmap = colors.ListedColormap(['tab:green', 'tab:blue', 'tab:orange'])
-bounds = [0.5,1.5,2.5,3.5,4.5,10000]
-norm = colors.BoundaryNorm(bounds, cmap.N)
-mat = plt.imshow(grid, interpolation='nearest', origin='lower',
-                    cmap=cmap, norm=norm)
+ax.bar(range(N), downCounts, label='DOWN')
+ax.bar(range(N), upCounts, bottom=downCounts,label='UP')
+plt.title(f"Column-wise homogeneity plot for t = {T}")
+plt.ylabel(f"Up+Down")
+plt.xlabel(f"Column index")
+ax.legend()
+    # for row in range(N):
+    #     if grid[col][row]
 
-plt.colorbar(mat, cmap=cmap, norm=norm, boundaries=bounds, ticks=states)
+# plt.plot(range(N), homogeneity, linestyle='dotted', marker='H')
+# plt.title(f"Column-wise homogeneity plot for t = {T}")
+# plt.ylabel(f"Up-Down/(Up+Down)")
+# plt.xlabel(f"Column index")
 
-ani = animation.FuncAnimation(fig, update, interval=200,
-                              save_count=50)
+
 
 plt.show()

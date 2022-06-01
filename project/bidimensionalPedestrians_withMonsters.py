@@ -42,8 +42,8 @@ def update(data):
     currentFlow = 0
 
     # STATES #
-    global EMPTY, UP, DOWN
-    states = [EMPTY, UP, DOWN]
+    global EMPTY, UP, DOWN, MONSTER
+    states = [EMPTY, UP, DOWN, MONSTER]
 
     # PROBABILITIES #
     global PL11, PR11, PW11, PR12, PW12, PL13, PW13, \
