@@ -16,78 +16,89 @@ N = 32
 EMPTY, UP, DOWN, MONSTER, WALL = 1, 2, 3, 4, 9999
 states = [EMPTY, UP, DOWN, MONSTER]
 
-grid = [EMPTY for i in range(N*N)]
-
-grid = np.random.choice(states, (N,N+2), p=[0.80, 0.095, 0.095, 0.01])
-# grid = np.random.choice(states, (N,N+2), p=[0.7, 0.15, 0.15])
-for i in range(N):
-    grid[i][0], grid[i][-1] = WALL, WALL
-
-newGrid = grid.copy()
+# grid = [EMPTY for i in range(N*N)]
 
 T = 200
 iterations = 50
 
-
-flow_arr = []
-sortedness_arr = []
-rPrefer_arr = []
-
+# rPrefer_arr = []
+rPrefer = 0.7
 
 # rPrefer = 0
-number_of_rP = 11
 
-for rPrefer in [0.1*i for i in range(number_of_rP)]:
-    print(f"rPrefer: {rPrefer}")
+# PROBABILITIES
+L = (0.5 - 0.5*rPrefer)
+R = (0.5 + 0.5*rPrefer)
 
-    # PROBABILITIES
-    L = (0.5 - 0.5*rPrefer)
-    R = (0.5 + 0.5*rPrefer)
+neutral = 0.25
+balance = (1-neutral)/2
 
-    neutral = 0.25
-    balance = (1-neutral)/2
+PL11, PR11, PW11 = balance*(1 - rPrefer), balance*(1 + rPrefer), neutral
+PR12, PW12       = R, 1 - R
+PL13, PW13       = L, 1 - L
+PL21, PR21, PW21 = balance*(1 - rPrefer), balance*(1 + rPrefer), neutral
+PR22, PW22       = R, 1 - R
+PL23, PW23       = L, 1 - L
+PB  , PW3        = 0.5, 0.5
 
-    PL11, PR11, PW11 = balance*(1 - rPrefer), balance*(1 + rPrefer), neutral
-    PR12, PW12       = R, 1 - R
-    PL13, PW13       = L, 1 - L
-    PL21, PR21, PW21 = balance*(1 - rPrefer), balance*(1 + rPrefer), neutral
-    PR22, PW22       = R, 1 - R
-    PL23, PW23       = L, 1 - L
-    PB  , PW3        = 0.5, 0.5
+# R_preference = 0.8
+# twoOptions = (1 - R_preference)
+# threeOptions = (1 - R_preference)/2
+#
+# PL11, PR11, PW11 = threeOptions, R_preference, threeOptions
+# PR12, PW12       = R_preference, twoOptions
+# PL13, PW13       = twoOptions, R_preference
+# PL21, PR21, PW21 = threeOptions, R_preference, threeOptions
+# PR22, PW22       = R_preference, twoOptions
+# PL23, PW23       = twoOptions, R_preference
 
-    # R_preference = 0.8
-    # twoOptions = (1 - R_preference)
-    # threeOptions = (1 - R_preference)/2
-    #
-    # PL11, PR11, PW11 = threeOptions, R_preference, threeOptions
-    # PR12, PW12       = R_preference, twoOptions
-    # PL13, PW13       = twoOptions, R_preference
-    # PL21, PR21, PW21 = threeOptions, R_preference, threeOptions
-    # PR22, PW22       = R_preference, twoOptions
-    # PL23, PW23       = twoOptions, R_preference
+# PL11, PR11, PW11 = 0.25, 0.5, 0.25
+# PR12, PW12       = 0.75, 0.25
+# PL13, PW13       = 0.25, 0.75
+# PL21, PR21, PW21 = 0.25, 0.5, 0.25
+# PR22, PW22       = 0.75, 0.25
+# PL23, PW23       = 0.25, 0.75
+# PB  , PW3        = 0.5, 0.5
 
-    # PL11, PR11, PW11 = 0.25, 0.5, 0.25
-    # PR12, PW12       = 0.75, 0.25
-    # PL13, PW13       = 0.25, 0.75
-    # PL21, PR21, PW21 = 0.25, 0.5, 0.25
-    # PR22, PW22       = 0.75, 0.25
-    # PL23, PW23       = 0.25, 0.75
-    # PB  , PW3        = 0.5, 0.5
 
 
 
     #-------------------------------------------------------------------------------
-    def move_if_possible(choices, probabilities):
-        indices = [e for e in range(len(choices))]
-        index = np.random.choice(indices, p=probabilities)
-        target = choices[index]
+def move_if_possible(choices, probabilities):
+    indices = [e for e in range(len(choices))]
+    index = np.random.choice(indices, p=probabilities)
+    target = choices[index]
 
-        if newGrid[target] == EMPTY:
-            newGrid[target] = myType
-            newGrid[current] = EMPTY
+    if newGrid[target] == EMPTY:
+        newGrid[target] = myType
+        newGrid[current] = EMPTY
 
     #-------------------------------------------------------------------------------
+flow_arr = []
+sortedness_arr = []
+populationDensity_arr = []
+populationDensities = [0.05+0.1*i for i in range(0,10)]
+
+
+
+pM = 0.01
+
+for populationDensity in populationDensities:
+
+    pE = 1 - pM - populationDensity
+    pUP = populationDensity/2
+    pDOWN = pUP
+
+
+    print(f"populationDensity: {populationDensity}")
     for iteration in range(iterations):
+        grid = np.random.choice(states, (N,N+2), p=[pE, pUP, pDOWN, pM])
+        # grid = np.random.choice(states, (N,N+2), p=[0.7, 0.15, 0.15])
+        for i in range(N):
+            grid[i][0], grid[i][-1] = WALL, WALL
+
+        newGrid = grid.copy()
+
         totalFlow = []
         print(f"iteration: {iteration}")
 
@@ -209,22 +220,22 @@ for rPrefer in [0.1*i for i in range(number_of_rP)]:
 
         flow_arr.append(flow)
         sortedness_arr.append(sortedness)
-        rPrefer_arr.append(rPrefer)
+        populationDensity_arr.append(populationDensity)
 
 
 
 fig_sortedness = plt.subplots(figsize =(11, 7))
-plt.hist2d(rPrefer_arr, sortedness_arr, cmap="hot", bins=[11,20])
+plt.hist2d(populationDensity_arr, sortedness_arr, cmap="hot", bins=[len(populationDensities),20])
 plt.title(f"Heatmap of sortedness for iterations = {iterations} and t = {T}")
 plt.ylabel('Sortedness score')
-plt.xlabel('Right preference parameter')
+plt.xlabel('Population density parameter')
 plt.colorbar()
 
 fig_flow = plt.subplots(figsize =(11, 7))
-plt.hist2d(rPrefer_arr, flow_arr, cmap="hot", bins=[11,20])
+plt.hist2d(populationDensity_arr, flow_arr, cmap="hot", bins=[len(populationDensities),20])
 plt.title(f"Heatmap of flow for iterations = {iterations} and t = {T}")
 plt.ylabel('Flow score')
-plt.xlabel('Right preference parameter')
+plt.xlabel('Population density parameter')
 plt.colorbar()
 
 # fig, ax = plt.subplots()

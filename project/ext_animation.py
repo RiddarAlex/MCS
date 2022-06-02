@@ -17,7 +17,7 @@ states = [EMPTY, UP, DOWN, MONSTER]
 
 grid = [EMPTY for i in range(N*N)]
 
-grid = np.random.choice(states, (N,N+2), p=[0.95, 0.02, 0.02, 0.01])
+grid = np.random.choice(states, (N,N+2), p=[0.85, 0.07, 0.07, 0.01])
 for i in range(N):
     grid[i][0], grid[i][-1] = WALL, WALL
 
@@ -27,13 +27,40 @@ t = 0
 totalFlow = []
 
 # PROBABILITIES
-PL11, PR11, PW11 = 0.25, 0.5, 0.25
-PR12, PW12       = 0.75, 0.25
-PL13, PW13       = 0.25, 0.75
-PL21, PR21, PW21 = 0.25, 0.5, 0.25
-PR22, PW22       = 0.75, 0.25
-PL23, PW23       = 0.25, 0.75
+rPrefer = 1
+L = (0.5 - 0.5*rPrefer)
+R = (0.5 + 0.5*rPrefer)
+
+neutral = 0.25
+balance = (1-neutral)/2
+
+PL11, PR11, PW11 = balance*(1 - rPrefer), balance*(1 + rPrefer), neutral
+PR12, PW12       = R, 1 - R
+PL13, PW13       = L, 1 - L
+PL21, PR21, PW21 = balance*(1 - rPrefer), balance*(1 + rPrefer), neutral
+PR22, PW22       = R, 1 - R
+PL23, PW23       = L, 1 - L
 PB  , PW3        = 0.5, 0.5
+
+# rightPreference = 0.8
+# twoOptions = (1 - rightPreference)
+# threeOptions = (1 - rightPreference)/2
+#
+# PL11, PR11, PW11 = threeOptions, rightPreference, threeOptions
+# PR12, PW12       = rightPreference, twoOptions
+# PL13, PW13       = twoOptions, rightPreference
+# PL21, PR21, PW21 = threeOptions, rightPreference, threeOptions
+# PR22, PW22       = rightPreference, twoOptions
+# PL23, PW23       = twoOptions, rightPreference
+# PB  , PW3        = 0.5, 0.5
+
+# PL11, PR11, PW11 = 0.25, 0.5, 0.25
+# PR12, PW12       = 0.75, 0.25
+# PL13, PW13       = 0.25, 0.75
+# PL21, PR21, PW21 = 0.25, 0.5, 0.25
+# PR22, PW22       = 0.75, 0.25
+# PL23, PW23       = 0.25, 0.75
+# PB  , PW3        = 0.5, 0.5
 
 #-------------------------------------------------------------------------------
 def update(data):
@@ -140,7 +167,7 @@ def update(data):
     if t%50 == 0:
         print(f"t: {t} \tPopulation size: {populationSize}")
         if t != 0:
-            flow = sum(totalFlow)/(populationSize*t)
+            flow = N*sum(totalFlow)/(populationSize*t)
             print(f"Flow: {flow}")
     print(f"Flow at t = {t}: {totalFlow[t]}")
 
